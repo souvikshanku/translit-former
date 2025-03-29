@@ -52,15 +52,18 @@ class SelfAttention(nn.Module):
             causal_w_prefix = [torch.cat([
                 torch.ones(seq_len, length),
                 torch.zeros(seq_len, seq_len - length)
-            ], 1) for length in always_attend_upto]
+            ], dim=1) for length in always_attend_upto]
 
             mask = [(causal[i] + causal_w_prefix[i]) == 0 for i in range(batch_size)]
-            mask = torch.stack(mask, dim=0).unsqueeze(1)
+            mask = torch.stack(mask, dim=0).unsqueeze(1).to(device)
 
             return score.masked_fill(mask, float("-inf"))
 
         else:
-            mask = torch.triu(torch.ones(seq_len, seq_len, device=score.device), diagonal=1).bool()
+            mask = torch.triu(
+                torch.ones(seq_len, seq_len, device=score.device),
+                diagonal=1
+            ).bool().to(device)
             return score.masked_fill(mask.unsqueeze(0).unsqueeze(0), float("-inf"))
 
     def forward(self, x, always_attend_upto):
@@ -120,7 +123,7 @@ class LM(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.num_block = 3
-        self.vocab_size = 163
+        self.vocab_size = 140
         self.context_length = CONTEXT_LENGTH
         self.d_model = 32
 

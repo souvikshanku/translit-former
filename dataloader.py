@@ -11,11 +11,11 @@ class Data(Dataset):
         self.tokens = json.load(open(tokens, "r"))
 
     def __len__(self):
-        return len(self.words_dict)
+        return len(self.words_df)
 
     def __getitem__(self, idx):
-        bengali = self.words_df.iloc[idx]["bn"]
-        english = self.words_df.iloc[idx]["en"]
+        bengali = str(self.words_df.iloc[idx]["bn"]).lower()
+        english = str(self.words_df.iloc[idx]["en"]).lower()
 
         tokens = (
             [self.tokens[b] for b in bengali]
@@ -28,5 +28,5 @@ class Data(Dataset):
         mask = [0] * len(bengali) + [1] * (len(english) + 1)
         mask += [0] * (self.context_length - len(mask))
 
-        length = len(bengali)  # from prefix-LM
-        return (tokens + pad), mask, length
+        length = len(bengali)  # from prefix-LM, attend the whole word
+        return (tokens + pad), mask, length + 1
