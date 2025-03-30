@@ -1,35 +1,22 @@
 import torch
 import torch.nn.functional as F
-from torch.utils.data import DataLoader
 import torch.optim as optim
-import json
+from torch.utils.data import DataLoader
 
+from config import LM_Config
 from dataloader import Data
 from model import LM
 
 
 if __name__ == "__main__":
-    with open("tokenizer.json", "r") as f:
-        tokens = json.load(f)
-
-    tokens_rev = {v: k for k, v in tokens.items()}
-
-    words_dict = json.load(open("data.json", "r"))
-
-    with open("test.json", "r") as f:
-        test_json = json.load(f)
-
-    with open("train.json", "r") as f:
-        train_json = json.load(f)
-
     def collate_fn(batch):
         return batch  # otherwise list[list] somehow gets converted to list[tensor]
 
-    CONTEXT_LENGTH = 64
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    config = LM_Config()
 
-    dataset = Data(CONTEXT_LENGTH, "train.json", "tokenizer.json")
-    dataloader = DataLoader(dataset, batch_size=64, shuffle=True, collate_fn=collate_fn)
-    device = torch.device("cpu")
+    dataset = Data(config.context_length, "data/train.csv", "tokenizer.json")
+    dataloader = DataLoader(dataset, batch_size=256, shuffle=True, collate_fn=collate_fn)
 
     lm = LM()
     lm.to(device)
@@ -39,9 +26,7 @@ if __name__ == "__main__":
     optimizer = optim.Adam(lm.parameters(), lr=0.005)
     scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
 
-    lm.train()
-
-    num_epochs = 50
+    num_epochs = 100
 
     for epoch in range(num_epochs):
         epoch_loss = 0
