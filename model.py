@@ -6,7 +6,6 @@ from config import LM_Config
 
 
 config = LM_Config()
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -30,7 +29,7 @@ class SelfAttention(nn.Module):
         self.W_k = nn.Linear(config.d_model, config.d_model)
         self.W_v = nn.Linear(config.d_model, config.d_model)
 
-        self.c_proj = nn.Linear(config.d_model, config.d_model)
+        self.W_proj = nn.Linear(config.d_model, config.d_model)
 
     def mask(self, score, always_attend_upto):
         batch_size, _, seq_len, _ = score.shape
@@ -58,6 +57,7 @@ class SelfAttention(nn.Module):
             return score.masked_fill(mask.unsqueeze(0).unsqueeze(0), float("-inf"))
 
     def forward(self, x, always_attend_upto):
+        # could have calculated q-k-v in one single matmul too
         query = self.W_q(x).reshape(
             -1, config.context_length, config.num_heads, config.d_head
         ).transpose(1, 2)
@@ -82,7 +82,7 @@ class SelfAttention(nn.Module):
             -1, config.context_length, config.d_model
         )
 
-        value = self.c_proj(value)
+        value = self.W_proj(value)  # this is different than the position-wise FFNs
 
         return value
 
