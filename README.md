@@ -1,6 +1,10 @@
 # translit-former
+<!-- markdownlint-disable MD033 MD045 -->
+<p align="center">
+  <img src="translit_former.jpg" width="250"/>
+</p>
 
-`translit-former` is a transformer-based transliteration model. It works pretty well when trained on the Bengali subset of the [Dakshina dataset](https://github.com/google-research-datasets/dakshina).
+`translit-former` is a transformer-based transliteration model. Works pretty well when trained on the Bengali subset of the [Dakshina dataset](https://github.com/google-research-datasets/dakshina). Recently wrote a blog-post on this which you can read [here](https://souvikshanku.github.io/blog/translit-former/).
 
 ## Example Usage
 
